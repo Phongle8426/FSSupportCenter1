@@ -4,64 +4,68 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".HomeCenter">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:orientation="vertical">
 
         <io.ghyeok.stickyswitch.widget.StickySwitch
             android:id="@+id/sticky_switch"
-            android:layout_width="139dp"
+            android:layout_width="230dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginStart="130dp"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="5dp"
             app:ss_animationDuration="600"
             app:ss_animationType="line"
             app:ss_iconPadding="18dp"
-            app:ss_iconSize="22dp"
+            app:ss_iconSize="70dp"
             app:ss_leftIcon="@drawable/ic_off"
             app:ss_rightIcon="@drawable/ic_on"
             app:ss_sliderBackgroundColor="#9E9E9E"
-            app:ss_switchColor="#F43C2F" />
+            app:ss_switchColor="#F44336" />
+
         <TextView
+            android:id="@+id/text1"
+            android:text="You aren't ready to receive the request."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active"
             android:textSize="20sp"
-            android:layout_marginTop="15dp"
-            android:layout_marginStart="35dp"/>
-        <ImageView
-            android:id="@+id/dotOnline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_offline"
-            android:layout_marginTop="18dp"
-            android:layout_marginStart="5dp"/>
+            android:textColor="#FFF43C2F"
+            android:layout_gravity="center_horizontal"/>
     </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="15dp"
+        android:text="Active"
+        android:textSize="20sp" />
 
     <ImageView
-        android:id="@+id/imgoff"
-        android:layout_width="247dp"
-        android:layout_height="488dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        app:srcCompat="@drawable/error" />
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/find"
-            android:layout_width="wrap_content"
-            android:layout_height="350dp"
-            android:layout_marginTop="150dp"
-            app:lottie_rawRes="@raw/onhome"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            android:layout_centerHorizontal="true" />
+        android:id="@+id/dotOnline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="18dp"
+        android:src="@drawable/ic_offline" />
+    <Button
+        android:id="@+id/btn_setting"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_setting"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="5dp"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigate"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="1dp"
         android:background="@drawable/rounded"
         app:itemIconTint="@drawable/selector"
 

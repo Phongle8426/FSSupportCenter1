@@ -3,22 +3,23 @@ package com.example.fssupportcenter;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.fssupportcenter.Object.ObjectLocationCenter;
+import com.example.fssupportcenter.Modules.StringUtils;
 import com.example.fssupportcenter.Object.ObjectProfileCenter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,20 +46,23 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
     GoogleMap map;
     SupportMapFragment mapFragment;
     TextInputEditText centerName,centerMail,centerPhone,centerAddress;
-    Button confirm,btn_confirm_address;
+    Button btn_confirm_address;
+    TextView confirm;
     AutoCompleteTextView centerType;
+
     private String uidCenter,centerName1,centerPhone1,centerMail1,centerType1,centerAddress1,longitude,latitude,namecity;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    public static final String MyPREFERENCES = "MyPrefs"; //biến lưu của cặp user/password
+    public static final String MyPREFERENCESPROFILE = "MyPrefs"; //biến lưu của cặp user/password
     public static final String TYPECENTER = "typeKey";
+    public static final String CITYCENTER = "cityKey";
     SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_center);
-        sharedPreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(MyPREFERENCESPROFILE, Context.MODE_PRIVATE);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         Anhxa();
         mapFragment.getMapAsync(this);
@@ -84,25 +88,29 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
         centerAddress1 = centerAddress.getText().toString();
     }
     // hàm lưu trữ Type center
-    public void saveTypeKey(String type){
+    public void saveTypeKey(String type,String city){
         SharedPreferences.Editor editor =sharedPreferences.edit();
         editor.putString(TYPECENTER,type);
+        editor.putString(CITYCENTER,city);
         editor.commit();
     }
     //Hàm đẩy dữ liệu InformationCenter và CenterLocation lên Db và lưu Type center lại
     public void pushInformationCenter(){
         getInforField();
         ObjectProfileCenter objectProfileCenter =
-                new ObjectProfileCenter(centerName1,centerMail1,centerPhone1,centerType1,centerAddress1);
-        ObjectLocationCenter objectLocationCenter = new ObjectLocationCenter(latitude,longitude,namecity,centerName1,uidCenter);
-        mDatabase.child("InformationCenter").child(centerType1).child(uidCenter).setValue(objectProfileCenter);
-        mDatabase.child("CenterLocation").child(centerType1).child(namecity).child(uidCenter).setValue(objectLocationCenter);
-        saveTypeKey(centerType1);
+                new ObjectProfileCenter(centerName1,centerMail1,centerPhone1,
+                        centerType1,centerAddress1,latitude,longitude,namecity,"false",uidCenter);
+        //ObjectLocationCenter objectLocationCenter = new ObjectLocationCenter(latitude,longitude,namecity,centerName1,uidCenter);
+        mDatabase.child("InformationCenter").child(centerType1).child(namecity).child(uidCenter).setValue(objectProfileCenter);
+       // mDatabase.child("CenterLocation").child(centerType1).child(namecity).child(uidCenter).setValue(objectLocationCenter);
+        saveTypeKey(centerType1,namecity);
     }
 
     // Hàm lấy thông tin của center từ DB về hiển thị trên các field
     public void getInformationCenter(){
-    mDatabase.child("InformationCenter").addValueEventListener(new ValueEventListener() {
+        String center_Type =sharedPreferences.getString(TYPECENTER,"");
+        String center_City =sharedPreferences.getString(CITYCENTER,"");
+        mDatabase.child("InformationCenter").child(center_Type).child(center_City).child(uidCenter).addValueEventListener(new ValueEventListener() {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
         if (snapshot.exists())
@@ -113,18 +121,18 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
     public void onCancelled(@NonNull DatabaseError error) {
 
     }
-});
+    });
     }
 
     // Hàm lấy thông tin của center từ DB về hiển thị trên các field
     public void showInformationCenter(DataSnapshot snapshot){
+
         ObjectProfileCenter inforCenter = new ObjectProfileCenter();
-        String center_Type =sharedPreferences.getString(TYPECENTER,"");
-        inforCenter.setCenter_name(snapshot.child(center_Type).child(uidCenter).child("center_name").getValue(String.class));
-        inforCenter.setCenter_email(snapshot.child(center_Type).child(uidCenter).child("center_email").getValue(String.class));
-        inforCenter.setCenter_phone(snapshot.child(center_Type).child(uidCenter).child("center_phone").getValue(String.class));
-        inforCenter.setCenter_type(snapshot.child(center_Type).child(uidCenter).child("center_type").getValue(String.class));
-        inforCenter.setCenter_address(snapshot.child(center_Type).child(uidCenter).child("center_address").getValue(String.class));
+        inforCenter.setCenter_name(snapshot.child("center_name").getValue(String.class));
+        inforCenter.setCenter_email(snapshot.child("center_email").getValue(String.class));
+        inforCenter.setCenter_phone(snapshot.child("center_phone").getValue(String.class));
+        inforCenter.setCenter_type(snapshot.child("center_type").getValue(String.class));
+        inforCenter.setCenter_address(snapshot.child("center_address").getValue(String.class));
 
         centerName.setText(inforCenter.getCenter_name());
         centerMail.setText(inforCenter.getCenter_email());
@@ -154,6 +162,27 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
             return true;
         }
         return false;
+    }
+    // Hfm mở dialog xác nhận lư profile
+    public void openDialogConfirmSaveProfile(){
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Confirm save profile");
+        dialog.setMessage("Are you sure you want to save the information above? Some information can not be changed. Please consider !");
+        dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                pushInformationCenter();
+                Toast.makeText(ProfileCenter.this, "Save information successful !", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        AlertDialog al = dialog.create();
+        al.show();
     }
     // hàm đặt các type center vào menu
     public void setMenuTypeCenter(){
@@ -193,11 +222,8 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
             @Override
             public void onClick(View view) {
                 if (catchError()==false){
-                    pushInformationCenter();
-                    Toast.makeText(ProfileCenter.this, "Save information successful !", Toast.LENGTH_SHORT).show();
+                    openDialogConfirmSaveProfile();
                 }
-
-
             }
         });
     }
@@ -214,14 +240,14 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
         btn_confirm_address = findViewById(R.id.btn_confirm_address);
     }
 
-    // Hàm lấy thông tin location của center
+    // Hàm lấy thông tin location của center và hiện vị trí trên bản đồ
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         btn_confirm_address.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    final String location = centerAddress.getText().toString();
+                    final String location = StringUtils.removeAccent(centerAddress.getText().toString());
                     if (location == null || location.equals("")){
                         Toast.makeText(ProfileCenter.this, "Input your address, Please !", Toast.LENGTH_SHORT).show();
                     }else{
@@ -243,7 +269,7 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
                             map.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
                                 @Override
                                 public void onMapLoaded() {
-                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
+                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
                                     map.addMarker(new MarkerOptions().title(location).position(latLng));
                                 }
                             });

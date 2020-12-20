@@ -38,12 +38,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallback {
 
     String[] COUNTRIES = new String[] {"Police", "Hospital", "Fire"};
     GoogleMap map;
+    List<ObjectProfileCenter> centerList = new ArrayList<>();
     SupportMapFragment mapFragment;
     TextInputEditText centerName,centerMail,centerPhone,centerAddress;
     Button btn_confirm_address;
@@ -110,11 +112,17 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
     public void getInformationCenter(){
         String center_Type =sharedPreferences.getString(TYPECENTER,"");
         String center_City =sharedPreferences.getString(CITYCENTER,"");
-        mDatabase.child("InformationCenter").child(center_Type).child(center_City).child(uidCenter).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("InformationCenter").child(center_Type).child(center_City).addValueEventListener(new ValueEventListener() {
     @Override
     public void onDataChange(@NonNull DataSnapshot snapshot) {
+        centerList.clear();
         if (snapshot.exists())
-            showInformationCenter(snapshot);
+            for (DataSnapshot data : snapshot.getChildren()){
+                ObjectProfileCenter profile = data.getValue(ObjectProfileCenter.class);
+                centerList.add(profile);
+            }
+
+        centerName.setText(centerList.get(0).getCenter_name());
     }
 
     @Override
@@ -127,7 +135,7 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
     // Hàm lấy thông tin của center từ DB về hiển thị trên các field
     public void showInformationCenter(DataSnapshot snapshot){
 
-        ObjectProfileCenter inforCenter = new ObjectProfileCenter();
+/*        ObjectProfileCenter inforCenter = new ObjectProfileCenter();
         inforCenter.setCenter_name(snapshot.child("center_name").getValue(String.class));
         inforCenter.setCenter_email(snapshot.child("center_email").getValue(String.class));
         inforCenter.setCenter_phone(snapshot.child("center_phone").getValue(String.class));
@@ -138,7 +146,13 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
         centerMail.setText(inforCenter.getCenter_email());
         centerPhone.setText(inforCenter.getCenter_phone());
         centerType.setText(inforCenter.getCenter_type());
-        centerAddress.setText(inforCenter.getCenter_address());
+        centerAddress.setText(inforCenter.getCenter_address());*/
+        for (DataSnapshot data : snapshot.getChildren()){
+            ObjectProfileCenter profile = data.getValue(ObjectProfileCenter.class);
+            centerList.add(profile);
+        }
+
+        centerName.setText(centerList.get(0).getCenter_name());
     }
 
     // Hàm bắt các lỗi nhập
@@ -277,5 +291,9 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
                     }
             }
         });
+    }
+    @Override
+    public void onBackPressed(){
+
     }
 }

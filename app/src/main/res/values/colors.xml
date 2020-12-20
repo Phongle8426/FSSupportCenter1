@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="amber">#FF0D0D</color>
-    <color name="accent">#000</color>
+    <color name="accent">#000000</color>
     <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">#DA002B</color>
 </resources>

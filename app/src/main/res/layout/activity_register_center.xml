@@ -19,11 +19,11 @@
         app:lottie_rawRes="@raw/registrationanimation" />
 
     <TextView
-        android:layout_width="233dp"
+        android:layout_width="277dp"
         android:layout_height="90dp"
-        android:fontFamily="@font/bungee"
         android:layout_marginStart="20dp"
-        android:text="Register Account"
+        android:fontFamily="@font/bungee"
+        android:text="Register Account Center"
         android:textColor="#da002b"
         android:textSize="30dp" />
 

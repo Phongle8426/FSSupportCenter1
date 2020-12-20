@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
         android:allowBackup="true"
@@ -14,27 +17,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/map_key" />
-        <activity android:name=".Direction"/>
-        <activity android:name=".RegisterCenter" />
-        <activity android:name=".ProfileCenter" />
-        <activity android:name=".HomeCenter" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".ForgotPassword" />
-        <activity android:name=".maps" />
-        <activity android:name=".LogInCenter">
-            <meta-data
-                android:name="preloaded_fonts"
-                android:resource="@array/preloaded_fonts" />
-
+        <activity android:name=".WelconeTeamCenter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/map_key" />
+        <service android:name=".ExampleJobService" />
+        <receiver android:name=".myLocation" />
+        <activity android:name=".DetailHistory"></activity>
+        <activity android:name=".LogInCenter" />
+        <activity android:name=".UpdateLocation" />
+        <activity android:name=".getValueChange" />
+        <activity android:name=".Direction" />
+        <activity android:name=".RegisterCenter" />
+        <activity android:name=".ProfileCenter" />
+        <activity android:name=".HomeCenter" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".ForgotPassword" />
+        <activity android:name=".maps" />
+        <activity android:name=".History"/>
     </application>
 
 </manifest>

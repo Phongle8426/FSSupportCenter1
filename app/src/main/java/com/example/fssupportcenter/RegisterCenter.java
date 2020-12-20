@@ -51,6 +51,7 @@ public class RegisterCenter extends AppCompatActivity {
         center_regis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (cacthError()==false)
                     onRegisCenterAccount();
             }
         });
@@ -101,7 +102,23 @@ public class RegisterCenter extends AppCompatActivity {
             }
         });
     }
-
+    public boolean cacthError(){
+        final String emailPattern =  "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+        getValueOnField();
+        if (centeremail.isEmpty() || centerphone.isEmpty() || centername.isEmpty()){
+            Toast.makeText(RegisterCenter.this, "Something is empty !", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        if (centerphone.length() != 10){
+            Toast.makeText(RegisterCenter.this, "Invalid phone number!", Toast.LENGTH_LONG).show();
+            return true;
+        }
+        if (!centeremail.matches(emailPattern)){
+            Toast.makeText(getApplicationContext(), "Invalid email", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return false;
+    }
     public void AnhXa(){
         center_name = findViewById(R.id.edtxt_centerName);
         center_email = findViewById(R.id.edtxt_centerEmail);

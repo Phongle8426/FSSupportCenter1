@@ -5,6 +5,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import io.ghyeok.stickyswitch.widget.StickySwitch;
 
@@ -88,9 +91,10 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
     private String uidCenterTeam,uidcenter;
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    SharedPreferences sRInforUser,sharedPreferencesAcountTeam;
-    public static final String MyPREFERENCESTATUS = "";
+    SharedPreferences sRInforUser,sharedPreferencesAcountTeam,srstatus;
+    public static final String MySRSTATUS = "status";
     public static final String STATUS = "demo";
+    static final int REQUEST_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,11 +103,14 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
         setContentView(R.layout.activity_home_center);
         sharedPreferencesAcountTeam = getSharedPreferences(MyPREFERENCESLOGINTEAM, Context.MODE_PRIVATE);
         sRInforUser = getSharedPreferences(MyPREFERENCESINFORUSER, Context.MODE_PRIVATE);
+        srstatus = getSharedPreferences(MySRSTATUS, Context.MODE_PRIVATE);
         uidCenterTeam = sharedPreferencesAcountTeam.getString(CODE,"");
         uidcenter = sharedPreferencesAcountTeam.getString(IDCENTER,"");
-        dialogReceiverNotification = new DialogReceiverNotification();
+       // dialogReceiverNotification = new DialogReceiverNotification();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        checkPermission();
         Anhxa();
+        loadData();
         animSlideRight = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_slide_right);
         animSlideRight.setAnimationListener((Animation.AnimationListener) this);
         animRotateSnip = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_rotate_snip);
@@ -120,19 +127,83 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
         receiveData();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        clearDataStatus();
+        activeStatusOff();
+    }
+
+    public void checkPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) +
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(HomeCenter.this,Manifest.permission.ACCESS_FINE_LOCATION)
+               || ActivityCompat.shouldShowRequestPermissionRationale(HomeCenter.this,Manifest.permission.ACCESS_COARSE_LOCATION)){
+                AlertDialog.Builder builder = new AlertDialog.Builder(HomeCenter.this);
+                builder.setTitle("Grant those Permission");
+                builder.setMessage("We will be use you LOCATION and COARSE LOCATION");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ActivityCompat.requestPermissions(
+                                HomeCenter.this,
+                                new String[]{
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                },
+                                REQUEST_CODE
+                        );
+                    }
+                });
+                builder.setNegativeButton("Cancel",null);
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }else{
+                ActivityCompat.requestPermissions(
+                        HomeCenter.this,
+                        new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        },
+                        REQUEST_CODE
+                );
+            }
+        }else{
+            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void saveData(String status){
+        SharedPreferences.Editor editor = srstatus.edit();
+        editor.putString(MySRSTATUS, status);
+        editor.commit();
+    }
+    public String loadData(){
+       // Toast.makeText(this, ""+srstatus.getString(MySRSTATUS,""), Toast.LENGTH_SHORT).show();
+        return srstatus.getString(MySRSTATUS,"");
+    }
+    private void clearDataStatus() {
+        SharedPreferences.Editor editor = srstatus.edit();
+        editor.clear();
+        editor.commit();
+    }
     public void activeStatusOn() {
         try{
-            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("status_active").setValue("true");
+            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("status_active").setValue(true);
         }catch (Exception e){
         }
     }
 
     public void activeStatusOff() {
         try{
-            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("status_active").setValue("false");
+            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("status_active").setValue(false);
             mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").
                     child(uidCenterTeam).child("team_latitude").setValue("");
             mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").
+                    child(uidCenterTeam).child("team_longitude").setValue("");
+            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").
+                    child(uidCenterTeam).child("team_latitude").setValue("");
+            mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").
                     child(uidCenterTeam).child("team_longitude").setValue("");
         }catch (Exception e){
         }
@@ -147,6 +218,7 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
 
     public void sigOut() {
         clearData();
+        clearDataStatus();
         Intent intent_toLogin = new Intent(HomeCenter.this, WelconeTeamCenter.class);
         intent_toLogin.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK| Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent_toLogin);
@@ -195,6 +267,11 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
                 editor.commit();
                 mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("status_active").setValue("true");
                 mDatabase.child("CenterTeam").child(uidcenter).child("InforTeam").child(uidCenterTeam).child("Mission").child("status").setValue("false");
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).child("name").setValue("");
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).child("phone").setValue("");
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).child("user_id").setValue("");
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).child("user_latitude").setValue("");
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).child("user_longitude").setValue("");
             }
         });
         AlertDialog al = dialog.create();
@@ -212,10 +289,10 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.profile:
-                        startActivity(new Intent(getApplicationContext(), ProfileCenter.class));
-                        overridePendingTransition(0, 0);
-                        return true;
+//                    case R.id.profile:
+//                        startActivity(new Intent(getApplicationContext(), ProfileCenter.class));
+//                        overridePendingTransition(0, 0);
+//                        return true;
                     case R.id.history:
                         startActivity(new Intent(getApplicationContext(),History.class));
                         overridePendingTransition(0, 0);
@@ -260,7 +337,7 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
     }
 
     public void getData() {
-        mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child("h4d24h").addValueEventListener(new ValueEventListener() {
+        mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -275,11 +352,45 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
                     bundle.putString("LATITUDE", latitude_receiver);
                     bundle.putString("LONGITUDE", longitude_receiver);
                     bundle.putString("USERID",iduser_receiver);
-                    dialogReceiverNotification.show(getSupportFragmentManager(), "receiver");
-                    dialogReceiverNotification.setArguments(bundle);
+                 //   dialogReceiverNotification.show(getSupportFragmentManager(), "receiver");
+//                    dialogReceiverNotification = new DialogReceiverNotification();
+//                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                    Fragment oldFragment = getSupportFragmentManager().findFragmentByTag("receiver");
+//                    if (oldFragment != null){
+//                        transaction.remove(oldFragment).commit();
+//                    }
+//                    transaction.addToBackStack(null);
+//                    if(dialogReceiverNotification != null && dialogReceiverNotification.isAdded()){
+//                        return;
+//                    }
+                   // dialogReceiverNotification.show(getSupportFragmentManager(), "receiver");
+//                    dialogReceiverNotification.setArguments(bundle);
+//                    if(dialogReceiverNotification.isStateSaved()){
+//                        Log.d("loiii","loiiiiii");
+//                        transaction.remove(dialogReceiverNotification).commit();
+//
+//                    }
+//                    transaction.add(dialogReceiverNotification, "receiver");
+//                    dialogReceiverNotification.setArguments(bundle);
+//                    transaction.commitAllowingStateLoss();
+                    FragmentManager fm = getSupportFragmentManager();
+                    Fragment oldFragment = fm.findFragmentByTag("fragment_tag");
+                    if (oldFragment != null) {
+
+                        fm.beginTransaction().remove(oldFragment).commit();
+                    }
+                    dialogReceiverNotification = new DialogReceiverNotification();
+                    dialogReceiverNotification.name=name_receiver;
+                    dialogReceiverNotification.phone = phone_receiver;
+                    dialogReceiverNotification.latitude = latitude_receiver;
+                    dialogReceiverNotification.longitude = longitude_receiver;
+                    dialogReceiverNotification.iduser = iduser_receiver;
+                    fm.beginTransaction().add(dialogReceiverNotification , "fragment_tag").commitAllowingStateLoss();
+                  //  dialogReceiverNotification.setArguments(bundle);
+
                 } else
                     Toast.makeText(HomeCenter.this, "Error snapshot data !", Toast.LENGTH_SHORT).show();
-                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child("h4d24h").removeEventListener(this);
+                mDatabase.child("CenterTeam").child(uidcenter).child("Transactions").child(uidCenterTeam).removeEventListener(this);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -319,6 +430,10 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
         }
     }
     public void setEvent() {
+        if (loadData().equals("RIGHT")){
+            stickySwitch.setDirection(StickySwitch.Direction.RIGHT,true);
+            setUIHome(stickySwitch.getDirection());
+        }
         String name_receiver1 = sRInforUser.getString(NAME1,"");
         if (!name_receiver1.equals("")){
             stickySwitch.setEnabled(false);
@@ -339,11 +454,13 @@ public class HomeCenter extends AppCompatActivity implements Animation.Animation
                setUIHome(direction);
                 if (direction.name() == "RIGHT"){
                     activeStatusOn();
+                    saveData(direction.name());
                     Intent intent = new Intent(getApplicationContext(),ExampleJobService.class);
                     intent.setAction("Start");
                     startService(intent);
                 }else{
                     activeStatusOff();
+                    saveData(direction.name());
                     Intent intent1 = new Intent(getApplicationContext(),ExampleJobService.class);
                     intent1.setAction("Stop");
                     startService(intent1);

@@ -51,13 +51,13 @@ public class ExampleJobService extends Service {
 
         if (intent.getAction().equals("Start")) {
             mHandler.postDelayed(new Runnable() {
-               // int i = 0;
+                int i = 0;
                 @Override
                 public void run() {
                     if (!check){
                         updateLocation();
                        // Log.d("receiver","run: "+ i++);
-                      //  Toast.makeText(ExampleJobService.this, ""+i, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ExampleJobService.this, ""+i, Toast.LENGTH_SHORT).show();
                         mHandler.postDelayed(this, 3000);
                     }
                 }
@@ -86,7 +86,8 @@ public class ExampleJobService extends Service {
     private void updateLocation() {
         buildLocationRequest();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent());

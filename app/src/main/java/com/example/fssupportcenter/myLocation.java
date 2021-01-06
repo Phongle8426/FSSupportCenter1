@@ -42,8 +42,14 @@ public class myLocation extends BroadcastReceiver {
                             child(uid).child("team_latitude").setValue(String.valueOf(location.getLatitude()));
                     mDatabase.child("CenterTeam").child(centerName).child("Transactions").
                             child(uid).child("team_longitude").setValue(String.valueOf(location.getLongitude()));
+                    //
+                    mDatabase.child("CenterTeam").child(centerName).child("InforTeam").
+                            child(uid).child("team_latitude").setValue(String.valueOf(location.getLatitude()));
+                    mDatabase.child("CenterTeam").child(centerName).child("InforTeam").
+                            child(uid).child("team_longitude").setValue(String.valueOf(location.getLongitude()));
+                  //  Toast.makeText(context, location.getLatitude() + location.getLongitude() +"", Toast.LENGTH_SHORT).show();
             }
             }
-        }
+        }else Toast.makeText(context, "cc", Toast.LENGTH_SHORT).show();
     }
 }

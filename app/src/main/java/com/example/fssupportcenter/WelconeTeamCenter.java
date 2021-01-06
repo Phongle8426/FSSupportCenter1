@@ -9,8 +9,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fssupportcenter.Object.ObjectProfileCenter;
@@ -26,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class WelconeTeamCenter extends AppCompatActivity {
+public class WelconeTeamCenter extends AppCompatActivity implements Animation.AnimationListener {
 
     private DatabaseReference mDatabase;
     List<ObjectSupportCenter> centerList = new ArrayList<>();
@@ -36,8 +41,11 @@ public class WelconeTeamCenter extends AppCompatActivity {
     String[] idList1 = {};
     TextInputEditText centerType,centerCity,centerName,inputCode;
     Button login;
+    ImageView anh1,anh2,anh3;
+    TextView textLogo;
     String centerTypeSelected=null,centerCitySelected=null,centerNameSelected=null;
     SharedPreferences sharedPreferences;
+    Animation logo1,logo2,logo3,textlogo;
     public static final String MyPREFERENCESLOGINTEAM = "sharedLoginTeam";
     public static final String IDCENTER = "center";
     public static final String CODE = "code";
@@ -48,7 +56,30 @@ public class WelconeTeamCenter extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(MyPREFERENCESLOGINTEAM, Context.MODE_PRIVATE);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         AnhXa();
+        logo();
         setEvent();
+    }
+
+    public void logo(){
+        textlogo = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_slide_right_logo_2);
+        textlogo.setAnimationListener(this);
+        textLogo.startAnimation(textlogo);
+        logo1 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_silde_right_logo);
+        logo1.setAnimationListener(this);
+        logo2 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_slide_right_logo_1);
+        logo2.setAnimationListener((Animation.AnimationListener) this);
+        logo3 = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.anime_slide_left);
+        logo3.setAnimationListener((Animation.AnimationListener) this);
+        final Handler mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                anh1.startAnimation(logo1);
+                anh2.startAnimation(logo2);
+                anh3.startAnimation(logo3);
+                mHandler.postDelayed(this, 3000);
+            }
+        },3000);
     }
     public void setEvent(){
         centerType.setOnClickListener(new View.OnClickListener() {
@@ -118,11 +149,11 @@ public class WelconeTeamCenter extends AppCompatActivity {
                     centerList.clear();
                     nameList.clear();
                     idList.clear();
-                    Toast.makeText(WelconeTeamCenter.this, ""+snapshot.getKey(), Toast.LENGTH_SHORT).show();
+                  //  Toast.makeText(WelconeTeamCenter.this, ""+snapshot.getKey(), Toast.LENGTH_SHORT).show();
                     if (snapshot.exists()){
                         for (DataSnapshot data : snapshot.getChildren()){
                             ObjectSupportCenter profile = data.getValue(ObjectSupportCenter.class);
-                            centerList.add(profile);
+                                centerList.add(profile);
                             nameList.add(centerList.get(i[0]).getCenter_name());
                             idList.add(centerList.get(i[0]).getCenter_id());
                             i[0]++;
@@ -133,7 +164,7 @@ public class WelconeTeamCenter extends AppCompatActivity {
                         openDialogSelectCenterName();
                     }else
                         Toast.makeText(WelconeTeamCenter.this, "No have any center!", Toast.LENGTH_SHORT).show();
-                    mDatabase.child("InformationCenter").child(centerTypeSelected).child(centerCitySelected).removeEventListener(this);
+                    mDatabase.child("SupportCenter").child(centerTypeSelected).child(centerCitySelected).removeEventListener(this);
                 }
 
                 @Override
@@ -195,5 +226,24 @@ public class WelconeTeamCenter extends AppCompatActivity {
         centerName = findViewById(R.id.select_nameCenter);
         inputCode = findViewById(R.id.input_pass);
         login = findViewById(R.id.confirm_log);
+        anh1 = findViewById(R.id.anh1);
+        anh2 = findViewById(R.id.anh2);
+        anh3 = findViewById(R.id.anh3);
+        textLogo = findViewById(R.id.textlogo);
+    }
+
+    @Override
+    public void onAnimationStart(Animation animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animation animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animation animation) {
+
     }
 }

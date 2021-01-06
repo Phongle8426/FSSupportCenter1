@@ -123,14 +123,14 @@ public class DialogReceiverNotification extends AppCompatDialogFragment {
         mDatabase.child("CenterTeam").child(centerName).child("History").child(uidCenterTeam).push().setValue(historyTeam);
     }
     public void getInforReceiver(){
-        try{
-            Bundle bundle = getArguments();
-            name = bundle.getString("NAME","");
-            phone = bundle.getString("PHONE","");
-            latitude = bundle.getString("LATITUDE","");
-            longitude = bundle.getString("LONGITUDE","");
-            iduser = bundle.getString("USERID","");
-        }catch (NullPointerException ignored){}
+//        try{
+//            Bundle bundle = getArguments();
+//            name = bundle.getString("NAME","");
+//            phone = bundle.getString("PHONE","");
+//            latitude = bundle.getString("LATITUDE","");
+//            longitude = bundle.getString("LONGITUDE","");
+//            iduser = bundle.getString("USERID","");
+//        }catch (NullPointerException ignored){}
             name_user.setText(name);
             phone_user.setText(phone);
             location_user.setText(latitude +","+ longitude);

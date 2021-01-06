@@ -210,7 +210,7 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
     //Hàm thực hiện chuyển các TAB
     public void activeItemBottomNavigation(){
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigate);
-        bottomNavigationView.setSelectedItemId(R.id.profile);
+        //bottomNavigationView.setSelectedItemId(R.id.profile);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -223,8 +223,8 @@ public class ProfileCenter extends AppCompatActivity implements OnMapReadyCallba
                         //startActivity(new Intent(getApplicationContext(),Contact.class));
                         overridePendingTransition(0,0);
                         return true;
-                    case R.id.profile:
-                        return true;
+//                    case R.id.profile:
+//                        return true;
                 }
                 return false;
             }
